@@ -1,9 +1,9 @@
 
 //投稿データをローカルストレージに保存
 function saveMessage(handle, text) {
-  const messages = JSON.parse(localStorage.getItem("messages") || "[]");
+  const messages = JSON.parse(sessionStorage.getItem("messages") || "[]");
   messages.push({ handle, text });
-  localStorage.setItem("messages", JSON.stringify(messages));
+  sessionStorage.setItem("messages", JSON.stringify(messages));
 }
 
 //投稿のたびに saveMessage() を呼ぶ
@@ -21,17 +21,17 @@ function postMessage() {
   const anonVal = document.getElementById("anon-extra").value || "";
   const newHandle = "名無しの" + anonVal;
   document.getElementById("handle").value = newHandle;
-  localStorage.setItem("handle", newHandle);
+  sessionStorage.setItem("handle", newHandle);
 }
 
 
 //投稿を表示する関数 renderMessages()
 function renderMessages(scroll = true) {
-  const messages = JSON.parse(localStorage.getItem("messages") || "[]");
+  const messages = JSON.parse(sessionStorage.getItem("messages") || "[]");
   const logBox = document.getElementById("log");
   logBox.innerHTML = ""; // 一旦クリア
 
-  const start_number = parseInt(localStorage.getItem("startNumber") || "1");
+  const start_number = parseInt(sessionStorage.getItem("startNumber") || "1");
 
   messages.forEach((msg, i) => {
     const wrapper = document.createElement("div");
@@ -63,27 +63,27 @@ function renderMessages(scroll = true) {
 function setStartNumber() {
   const value = parseInt(document.getElementById("startNumberInput").value);
   if (!isNaN(value) && value >= 1) {
-    localStorage.setItem("startNumber", value);
+    sessionStorage.setItem("startNumber", value);
     renderMessages();
   }
 }
 
 // 初期化時に startNumberInput に保存値を反映
 document.addEventListener("DOMContentLoaded", () => {
-  const stored = localStorage.getItem("startNumber");
+  const stored = sessionStorage.getItem("startNumber");
   if (stored) {
     document.getElementById("startNumberInput").value = stored;
   }
 });
 
 function editMessage() {
-  const startNumber = parseInt(localStorage.getItem("startNumber") || "1");
+  const startNumber = parseInt(sessionStorage.getItem("startNumber") || "1");
   const editIndex = parseInt(document.getElementById("edit-index").value) - startNumber;
   const editHandleInput = document.getElementById("edit-handle").value;
   const anonVal = document.getElementById("anon-extra").value || "";
   const editText = document.getElementById("edit-text").value.replace(/\n/g, "<br>") + "<br>";
 
-  const messages = JSON.parse(localStorage.getItem("messages") || "[]");
+  const messages = JSON.parse(sessionStorage.getItem("messages") || "[]");
 
   if (editIndex >= 0 && editIndex < messages.length) {
     const original = messages[editIndex];
@@ -93,7 +93,7 @@ function editMessage() {
       handle: newHandle,
       text: editText
     };
-    localStorage.setItem("messages", JSON.stringify(messages));
+    sessionStorage.setItem("messages", JSON.stringify(messages));
     renderMessages(false);
   } else {
     alert("該当の投稿はありません");
@@ -107,18 +107,18 @@ function editMessage() {
 
 
 function insertMessage() {
-  const startNumber = parseInt(localStorage.getItem("startNumber") || "1");
+  const startNumber = parseInt(sessionStorage.getItem("startNumber") || "1");
   const insertIndexRaw = parseInt(document.getElementById("insert-index").value);
   const insertIndex = insertIndexRaw - startNumber;
   const anonVal = document.getElementById("anon-extra").value || "";
   const handle = document.getElementById("insert-handle").value || "名無しの" + anonVal;
   const text = document.getElementById("insert-text").value.replace(/\n/g, "<br>") + "<br>";
 
-  const messages = JSON.parse(localStorage.getItem("messages") || "[]");
+  const messages = JSON.parse(sessionStorage.getItem("messages") || "[]");
 
   if (insertIndex >= 0 && insertIndex <= messages.length) {
     messages.splice(insertIndex, 0, { handle, text });
-    localStorage.setItem("messages", JSON.stringify(messages));
+    sessionStorage.setItem("messages", JSON.stringify(messages));
     renderMessages(false); // 自動スクロールしない
   } else {
     alert("該当の挿入位置が無効です");
@@ -146,7 +146,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
     // 初期化：ローカルストレージから復元
     window.addEventListener("DOMContentLoaded", () => {
-    const enterState = localStorage.getItem("enterToggle");
+    const enterState = sessionStorage.getItem("enterToggle");
     if (enterState === "true") {
         document.getElementById("enter-toggle").checked = true;
     }
@@ -154,7 +154,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
     // 状態が変わったとき保存
     document.getElementById("enter-toggle").addEventListener("change", (e) => {
-    localStorage.setItem("enterToggle", e.target.checked);
+    sessionStorage.setItem("enterToggle", e.target.checked);
     });
     //トグルボタン機能--------------------------------
 });
@@ -173,7 +173,7 @@ function insertQuote() {
 function clearAllMessages() {
   const confirmed = confirm("本当に全ての投稿を削除しますか？");
   if (confirmed) {
-    localStorage.removeItem("messages");
+    sessionStorage.removeItem("messages");
     renderMessages(); // 再描画
   }
 }
@@ -192,17 +192,17 @@ document.addEventListener("DOMContentLoaded", () => {
   renderMessages();
 
     // 初期化：常に名無しの〇〇でHN欄を上書き
-    const savedAnon = localStorage.getItem("anonExtra") || "";
+    const savedAnon = sessionStorage.getItem("anonExtra") || "";
     anonInput.value = savedAnon;
     handleInput.value = "名無しの" + savedAnon;
-    localStorage.setItem("handle", "名無しの" + savedAnon);
+    sessionStorage.setItem("handle", "名無しの" + savedAnon);
 
     // anon-extraを変更したらリアルタイム反映（常に反映）
     anonInput.addEventListener("input", () => {
     const anonVal = anonInput.value;
-    localStorage.setItem("anonExtra", anonVal);
+    sessionStorage.setItem("anonExtra", anonVal);
     handleInput.value = "名無しの" + anonVal;
-    localStorage.setItem("handle", "名無しの" + anonVal);
+    sessionStorage.setItem("handle", "名無しの" + anonVal);
     });
 
     window.setKotehan = function (id) {
@@ -211,7 +211,7 @@ document.addEventListener("DOMContentLoaded", () => {
         document.getElementById("handle").value = value;
 
         // 保存しない！次の投稿でリセットされるようにする
-        // localStorage.setItem("handle", value); ←これを削除またはコメントアウト
+        // sessionStorage.setItem("handle", value); ←これを削除またはコメントアウト
     }
     };
 
@@ -219,18 +219,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // コテハン欄の保存（ページ読み込み時に内容だけ復元）
   koteFields.forEach(id => {
-    const saved = localStorage.getItem(id);
+    const saved = sessionStorage.getItem(id);
     if (saved) document.getElementById(id).value = saved;
   });
 
 
   // Enterトグル復元
-  const enterState = localStorage.getItem("enterToggle");
+  const enterState = sessionStorage.getItem("enterToggle");
   if (enterState === "true") enterToggle.checked = true;
 
   // Enterトグル状態保存
   enterToggle.addEventListener("change", (e) => {
-    localStorage.setItem("enterToggle", e.target.checked);
+    sessionStorage.setItem("enterToggle", e.target.checked);
   });
 
   // Enterキーによる投稿

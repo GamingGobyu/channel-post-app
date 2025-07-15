@@ -86,7 +86,6 @@
       </div>
     </div>
   </div>
-  <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 <!--
 <script>
@@ -99,9 +98,9 @@ const logBox = document.getElementById("log");
 const koteFields = ['kote1', 'kote2', 'kote3', 'kote4'];
 
 window.onload = function () {
-  const savedAnon = localStorage.getItem("anonExtra");
-  const savedHandle = localStorage.getItem("handle");
-  const savedEnterToggle = localStorage.getItem("enterToggle");
+  const savedAnon = sessionStorage.getItem("anonExtra");
+  const savedHandle = sessionStorage.getItem("handle");
+  const savedEnterToggle = sessionStorage.getItem("enterToggle");
 
 if (savedAnon) {
     handleInput.value = "名無しの" + savedAnon;
@@ -111,7 +110,7 @@ if (savedAnon) {
   if (savedEnterToggle === "true") enterToggle.checked = true;
 
   koteFields.forEach(id => {
-    const saved = localStorage.getItem(id);
+    const saved = sessionStorage.getItem(id);
     if (saved) document.getElementById(id).value = saved;
   });
 
@@ -120,26 +119,26 @@ if (savedAnon) {
 };
 
 anonInput.addEventListener('input', () => {
-  localStorage.setItem("anonExtra", anonInput.value);
-  if (!localStorage.getItem("handle") || localStorage.getItem("handle").startsWith("名無しの")) {
+  sessionStorage.setItem("anonExtra", anonInput.value);
+  if (!sessionStorage.getItem("handle") || sessionStorage.getItem("handle").startsWith("名無しの")) {
     handleInput.value = "名無しの" + anonInput.value;
-    localStorage.setItem("handle", handleInput.value);
+    sessionStorage.setItem("handle", handleInput.value);
   }
 });
 
 handleInput.addEventListener('input', () => {
-  localStorage.setItem("handle", handleInput.value);
+  sessionStorage.setItem("handle", handleInput.value);
 });
 
 enterToggle.addEventListener('change', () => {
-  localStorage.setItem("enterToggle", enterToggle.checked);
+  sessionStorage.setItem("enterToggle", enterToggle.checked);
 });
 
 function setKotehan(id) {
   const value = document.getElementById(id).value;
   handleInput.value = value;
-  localStorage.setItem("handle", value);
-  localStorage.setItem(id, value);
+  sessionStorage.setItem("handle", value);
+  sessionStorage.setItem(id, value);
 }
 
 function insertQuote() {
