@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>チャンネル風小説 - Final v6</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="wrapper">
+    <div class="left-panel">
+      <div class="log" id="log">
+  <!-- 投稿メッセージはここにJSで描画されます -->
+      </div>
+
+      <form class="input-area" onsubmit="return false;">
+        <div class="input-row">
+          <label><strong>HN:</strong><input type="text" id="handle" name="handle" placeholder="ハンドルネーム"></label>
+        </div>
+        <div class="input-row">
+          <textarea id="text-input" name="text" placeholder="本文" rows="4"></textarea>
+        </div>
+        <div class="side-buttons">
+          <button type="button" onclick="insertQuote()">≫</button>
+          <button type="button" id="post-button" onclick="postMessage()">投稿</button>
+        </div>
+      </form>
+    </div>
+
+    <div class="right-panel">
+      <h4>オプション</h4>
+      <label>Enterで投稿:
+        <label class="toggle">
+          <input type="checkbox" id="enter-toggle">
+          <span class="slider"></span>
+        </label>
+      </label><br><br>
+      <label>名無しの <input type="text" id="anon-extra" placeholder="〇〇名"></label><br><br>
+      <div class="kotehan-group">
+        <label><input type="text" id="kote1" placeholder="HN1"><button onclick="setKotehan('kote1')" type="button">適用</button></label>
+        <label><input type="text" id="kote2" placeholder="HN2"><button onclick="setKotehan('kote2')" type="button">適用</button></label>
+        <label><input type="text" id="kote3" placeholder="HN3"><button onclick="setKotehan('kote3')" type="button">適用</button></label>
+        <label><input type="text" id="kote4" placeholder="HN4"><button onclick="setKotehan('kote4')" type="button">適用</button></label>
+      </div>
+      <hr>
+      <div>
+        <form id="start-number-form" onsubmit="return false;">
+          <label>投稿番号開始:</label>
+          <input type="number" id="startNumberInput" min="1" value="1">
+          <button type="button" onclick="setStartNumber()">適用</button>
+        </form>
+      </div>
+      <hr>
+      <div>
+        <div>
+          <h4>割り込み</h4>
+          <form id="insert-form" onsubmit="return false;">
+            <label>番号: <input type="number" id="insert-index" min="1" required></label><br>
+            <input type="text" id="insert-handle" placeholder="ハンドルネーム"><br>
+            <textarea id="insert-text" placeholder="本文" rows="2" style="width:90%;"></textarea><br>
+            <button type="button" onclick="insertMessage()">割り込む</button>
+          </form>
+        </div>
+      </div>
+      <hr>
+      <div>
+        <h4>編集</h4>
+        <form id="edit-form" onsubmit="return false;">
+          <label>番号: <input type="number" id="edit-index" min="1" required></label><br>
+          <input type="text" id="edit-handle" placeholder="ハンドルネーム"><br>
+          <textarea id="edit-text" placeholder="本文" rows="2" style="width:90%;"></textarea><br>
+          <button type="button" onclick="editMessage()">編集</button>
+        </form>
+      </div>
+      <hr>
+      <div>
+        <!-- 投稿クリアボタン -->
+        <button id="clear-all-button" onclick="clearAllMessages()">投稿を全削除</button>
+
+        <!-- 投稿保存ボタン 
+        <form method="POST" style="display:inline;">
+          <input type="hidden" name="mode" value="save">
+          <button type="submit">投稿を保存</button>
+        </form>
+        -->
+      </div>
+    </div>
+  </div>
+  <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+<!--
+<script>
+
+const handleInput = document.getElementById('handle');
+const textInput = document.getElementById('text-input');
+const enterToggle = document.getElementById('enter-toggle');
+const anonInput = document.getElementById('anon-extra');
+const logBox = document.getElementById("log");
+const koteFields = ['kote1', 'kote2', 'kote3', 'kote4'];
+
+window.onload = function () {
+  const savedAnon = localStorage.getItem("anonExtra");
+  const savedHandle = localStorage.getItem("handle");
+  const savedEnterToggle = localStorage.getItem("enterToggle");
+
+if (savedAnon) {
+    handleInput.value = "名無しの" + savedAnon;
+  }
+
+  if (savedAnon) anonInput.value = savedAnon;
+  if (savedEnterToggle === "true") enterToggle.checked = true;
+
+  koteFields.forEach(id => {
+    const saved = localStorage.getItem(id);
+    if (saved) document.getElementById(id).value = saved;
+  });
+
+  logBox.scrollTop = logBox.scrollHeight;
+  textInput.focus();
+};
+
+anonInput.addEventListener('input', () => {
+  localStorage.setItem("anonExtra", anonInput.value);
+  if (!localStorage.getItem("handle") || localStorage.getItem("handle").startsWith("名無しの")) {
+    handleInput.value = "名無しの" + anonInput.value;
+    localStorage.setItem("handle", handleInput.value);
+  }
+});
+
+handleInput.addEventListener('input', () => {
+  localStorage.setItem("handle", handleInput.value);
+});
+
+enterToggle.addEventListener('change', () => {
+  localStorage.setItem("enterToggle", enterToggle.checked);
+});
+
+function setKotehan(id) {
+  const value = document.getElementById(id).value;
+  handleInput.value = value;
+  localStorage.setItem("handle", value);
+  localStorage.setItem(id, value);
+}
+
+function insertQuote() {
+  const cursorPos = textInput.selectionStart;
+  const text = textInput.value;
+  const before = text.substring(0, cursorPos);
+  const after = text.substring(cursorPos);
+  textInput.value = before + '>>' + after;
+  textInput.focus();
+  textInput.selectionEnd = cursorPos + 2;
+}
+
+// 投稿番号の開始番号を保存
+function applyStartNumber() {
+  const newStart = document.getElementById("startNumberInput").value;
+  const form = document.createElement("form");
+  form.method = "POST";
+  form.action = "/apply_start_number";
+
+  const input = document.createElement("input");
+  input.type = "hidden";
+  input.name = "start_number";
+  input.value = newStart;
+  form.appendChild(input);
+  document.body.appendChild(form);
+  form.submit();
+}
+
+window.addEventListener("DOMContentLoaded", () => {
+  const cookies = document.cookie.split(";").reduce((acc, cookie) => {
+    const [key, val] = cookie.trim().split("=");
+    acc[key] = val;
+    return acc;
+  }, {});
+  if (cookies.start_number) {
+    document.getElementById("startNumberInput").value = cookies.start_number;
+  }
+});
+
+
+function jumpTo() {
+  const num = parseInt(document.getElementById("jump-num").value);
+  const post = document.querySelector('[data-index="' + num + '"]');
+  if (post) {
+    post.scrollIntoView({ behavior: "smooth", block: "center" });
+  } else {
+    let dummy = document.getElementById("dummy-post-" + num);
+    if (!dummy) {
+      dummy = document.createElement("div");
+      dummy.id = "dummy-post-" + num;
+      dummy.style.height = "20px";
+      dummy.style.background = "#fdd";
+      document.getElementById("log").appendChild(dummy);
+    }
+    setTimeout(() => {
+      dummy.scrollIntoView({ behavior: "smooth", block: "center" });
+    }, 100);
+  }
+}
+
+
+
+textInput.addEventListener("keydown", function(e) {
+  if (e.ctrlKey && e.key === "e") {
+    e.preventDefault();
+    this.form.submit();
+  }
+  if (enterToggle.checked && e.key === "Enter" && !e.shiftKey) {
+    e.preventDefault();
+    this.form.submit();
+  }
+});
+
+</script>
+-->
+
+
